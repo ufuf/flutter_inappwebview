@@ -402,7 +402,8 @@ public class InAppBrowserWebViewController: UIViewController, FlutterPlugin, UIS
             self.containerWebView.addSubview(self.webView)
             prepareConstraints()
             prepareWebView()
-            
+            webView.windowCreated = true
+
             if let wId = windowId, let webViewTransport = InAppWebView.windowWebViews[wId] {
                 self.webView.load(webViewTransport.request)
             } else {

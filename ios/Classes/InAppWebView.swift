@@ -844,6 +844,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate, WKNavi
     var windowId: Int64?
     var IABController: InAppBrowserWebViewController?
     var channel: FlutterMethodChannel?
+    var windowCreated = false
+
     var options: InAppWebViewOptions?
     var currentURL: URL?
     var x509CertificateData: Data?
@@ -1878,6 +1880,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate, WKNavi
                  decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         
+        if windowId != nil, !windowCreated {
+            decisionHandler(.cancel)
+            return
+        }
+
         if let url = navigationAction.request.url {
             
             if activateShouldOverrideUrlLoading && (options?.useShouldOverrideUrlLoading)! {
@@ -2022,7 +2029,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate, WKNavi
     }
     
     public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        
+        if windowId != nil, !windowCreated {
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
             challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault ||
             challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPDigest {
